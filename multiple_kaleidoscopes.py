@@ -122,7 +122,7 @@ def init_angles_list(n_kaleidos, min_num_angle_steps, max_num_angle_steps):
     return angles_list, min_angle_steps
 
 
-def generate_images_list(kaleidos_list, chosen_coords, max_shape, angles_list, min_angle_steps):
+def generate_images_list(kaleidos_list, chosen_coords, max_shape, angles_list, min_angle_steps, scale):
     result_images_list = []
 
     for k in range(min_angle_steps):
@@ -207,8 +207,8 @@ if __name__ == '__main__':
 
     result_images_list = generate_images_list(kaleidos_list=kaleidos_list, chosen_coords=chosen_coords,
                                               max_shape=max_shape, angles_list=angles_list,
-                                              min_angle_steps=min_angle_steps)
+                                              min_angle_steps=min_angle_steps, scale=scale)
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
-    result_images_list[0].save(os.path.join(save_dir, os.path.splitext(os.path.basename(image_path))[0] + ".gif"), save_all=True, append_images=result_images_list[1:])
+    result_images_list[0].save(os.path.join(save_dir, os.path.splitext(os.path.basename(image_path))[0] + ".gif"), save_all=True, append_images=result_images_list[1:], loop=0)
