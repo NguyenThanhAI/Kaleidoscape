@@ -75,9 +75,15 @@ def core(img, N, out, r_start, r_out, c_in, c_out, scale):
     old = img[0,0].copy()
     img[0,0] = (0, 0, 0)
 
-    bad = (Y < 0) | (Y >= in_rows) | (X < 0) | (X >= in_cols)
-    Y[bad] = 0
-    X[bad] = 0
+    #bad = (Y < 0) | (Y >= in_rows) | (X < 0) | (X >= in_cols)
+    Y = np.where(Y < 0, - (Y % in_rows), Y)
+    Y = np.where(Y > in_rows, (in_rows - (Y % in_rows)), Y)
+    X = np.where(X < 0, - (X % in_cols), X)
+    X = np.where(X > in_cols, (in_cols - (X % in_cols)), X)
+    Y = np.where(Y == in_rows, (in_rows - 1), Y)
+    X = np.where(X == in_cols, (in_cols - 1), X)
+    #Y[bad] = 0
+    #X[bad] = 0
 
     # sample input image to set each pixel of out
     out[:] = img[Y, X]
