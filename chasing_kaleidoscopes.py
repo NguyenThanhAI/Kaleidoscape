@@ -44,6 +44,7 @@ def get_args():
     parser.add_argument("--target_size", type=int, default=320)
     parser.add_argument("--scale", type=float, default=0.2)
     parser.add_argument("--n_proc", type=int, default=6)
+    parser.add_argument("--mode", type=str, choices=("circle", "full"), default="full")
     parser.add_argument("--save_dir", type=str, default=".")
 
     args = parser.parse_args()
@@ -61,10 +62,10 @@ def gen_params(n_kaleidos, height, width, min_num_sides, max_num_sides):
     return r_start, c_in, N
 
 
-def gen_kaleidoscope(i, image, r_start, c_in, N, target_size, scale):
+def gen_kaleidoscope(i, image, r_start, c_in, N, target_size, scale, mode):
     time_image = image.copy()
     out = kaleido(img=time_image, N=N, out="full", r_start=r_start[i], r_out=0, c_in=c_in[i],
-                  c_out=None, scale=scale, annotate=False)
+                  c_out=None, scale=scale, annotate=False, mode=mode)
     out = cv2.resize(out, (target_size, target_size))
 
     return Image.fromarray(out[:, :, ::-1])
@@ -81,6 +82,7 @@ if __name__ == '__main__':
     target_size = args.target_size
     scale = args.scale
     n_proc = args.n_proc
+    mode = args.mode
     save_dir = args.save_dir
 
     image = cv2.imread(image_path)
@@ -96,7 +98,7 @@ if __name__ == '__main__':
                                   min_num_sides=min_num_sides, max_num_sides=max_num_sides)
 
     gen_kaleidoscope_step = partial(gen_kaleidoscope, image=image, r_start=r_start,
-                                    c_in=c_in, N=N, target_size=target_size, scale=scale)
+                                    c_in=c_in, N=N, target_size=target_size, scale=scale, mode=mode)
 
     with Pool(processes=n_proc) as pool:
         images_list = pool.map(gen_kaleidoscope_step, list(range(n_kaleidos)))

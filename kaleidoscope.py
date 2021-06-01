@@ -19,7 +19,7 @@ def timethis(func):
     return wrapper
 
 
-def core(img, N, out, r_start, r_out, c_in, c_out, scale):
+def core(img, N, out, r_start, r_out, c_in, c_out, scale, mode="full"):
     in_rows, in_cols = img.shape[:2]
     if c_in is None:
         c_in = (dim // 2 for dim in (in_rows, in_cols))
@@ -75,15 +75,19 @@ def core(img, N, out, r_start, r_out, c_in, c_out, scale):
     old = img[0,0].copy()
     img[0,0] = (0, 0, 0)
 
-    #bad = (Y < 0) | (Y >= in_rows) | (X < 0) | (X >= in_cols)
-    Y = np.where(Y < 0, - (Y % in_rows), Y)
-    Y = np.where(Y > in_rows, (in_rows - (Y % in_rows)), Y)
-    X = np.where(X < 0, - (X % in_cols), X)
-    X = np.where(X > in_cols, (in_cols - (X % in_cols)), X)
-    Y = np.where(Y == in_rows, (in_rows - 1), Y)
-    X = np.where(X == in_cols, (in_cols - 1), X)
-    #Y[bad] = 0
-    #X[bad] = 0
+    if mode == "circle":
+        bad = (Y < 0) | (Y >= in_rows) | (X < 0) | (X >= in_cols)
+        Y[bad] = 0
+        X[bad] = 0
+    elif mode == "full":
+        Y = np.where(Y < 0, - (Y % in_rows), Y)
+        Y = np.where(Y > in_rows, (in_rows - (Y % in_rows)), Y)
+        X = np.where(X < 0, - (X % in_cols), X)
+        X = np.where(X > in_cols, (in_cols - (X % in_cols)), X)
+        Y = np.where(Y == in_rows, (in_rows - 1), Y)
+        X = np.where(X == in_cols, (in_cols - 1), X)
+    else:
+        raise ValueError("Unknown mode")
 
     # sample input image to set each pixel of out
     out[:] = img[Y, X]
@@ -108,7 +112,7 @@ def add_annotation(img, c_x, c_y, r_start, r_end):
 
 #@timethis
 def kaleido(img, N=10, out='same', r_start=0, r_out=0, c_in=None, c_out=None,
-            scale=1, annotate=False):
+            scale=1, annotate=False, mode="full"):
     ''' Return a kaleidoscope from img, with specified parameters.
     'img' is a 3-channel uint8 numpy array of image pixels.
     'N' is the number of mirrors.
@@ -124,7 +128,7 @@ def kaleido(img, N=10, out='same', r_start=0, r_out=0, c_in=None, c_out=None,
         display the selected region. Default True.
     '''
     out, c_x, c_y, r_start, r_end = core(img, N, out, r_start, r_out,
-                                         c_in, c_out, scale)
+                                         c_in, c_out, scale, mode)
 
     if annotate:
         add_annotation(img, c_x, c_y, r_start, r_end)
